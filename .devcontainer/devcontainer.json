@@ -1,0 +1,14 @@
+   {
+     "name": "OSTEP OS Lab",
+     "image": "mcr.microsoft.com/devcontainers/cpp:noble",
+     "customizations": {
+       "vscode": {
+         "extensions": [
+           "ms-vscode.cpptools",
+           "ms-python.python"
+         ]
+       }
+     },
+     "postCreateCommand": "sudo apt-get update && sudo apt-get install -y strace ltrace valgrind gdb make",
+     "remoteUser": "vscode"
+   }
