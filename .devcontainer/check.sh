@@ -1,12 +1,20 @@
 #!/usr/bin/env bash
-# OSTEP homework 실습 환경 점검 (학생 Codespace용)
+# OSTEP homework 실습 환경 점검 (학생 Codespace용)  v2
+# 결과는 화면과 hw/setup/check-result.txt 에 함께 기록됩니다.
 ROOT=${ROOT:-/workspaces/ostep-codespace-lab}
 HW="$ROOT/ext/ostep-homework"; CODE="$ROOT/ext/ostep-code"
 PASS=0; FAIL=0; LOG=/tmp/ostep-check.log; : > "$LOG"
-ok(){ printf '  [PASS] %s\n' "$1"; PASS=$((PASS+1)); }
-ng(){ printf '  [FAIL] %s  <- %s\n' "$1" "$2"; FAIL=$((FAIL+1)); }
-run(){ d=$1; shift; out=$("$@" 2>&1); rc=$?; echo "== $d (rc=$rc)" >> "$LOG"; echo "$out" >> "$LOG"
-  if [ $rc -eq 0 ]; then ok "$d"; else ng "$d" "$(echo "$out" | grep -v '^\s*$' | tail -1)"; fi; }
+ITEMS=()
+now_ms(){ echo $(( $(date +%s%N) / 1000000 )); }
+record(){ ITEMS+=("$(printf '%s\t%s\t%s' "$1" "$2" "$3")"); }
+ok(){ printf '  [PASS] %s\n' "$1"; PASS=$((PASS+1)); record PASS "$1" "$2"; }
+ng(){ printf '  [FAIL] %s  <- %s\n' "$1" "$3"; FAIL=$((FAIL+1)); record FAIL "$1" "$2"; }
+run(){ d=$1; shift; t0=$(now_ms); out=$("$@" 2>&1); rc=$?; dt=$(( $(now_ms) - t0 ))
+  echo "== $d (rc=$rc)" >> "$LOG"; echo "$out" >> "$LOG"
+  if [ $rc -eq 0 ]; then ok "$d" "$dt"; else ng "$d" "$dt" "$(echo "$out" | grep -v '^\s*$' | tail -1)"; fi; }
+
+STARTED=$(date -u +%Y-%m-%dT%H:%M:%SZ); T_START=$(now_ms)
+NONCE=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || date +%s%N)
 
 echo "[1] 기본 환경"
 run "Ubuntu 24.04"            grep -qx 'VERSION_CODENAME=noble' /etc/os-release
@@ -40,12 +48,14 @@ if [ -d "$T/hw" ]; then
       file-implementation/vsfs.py) args="-n 6 -s 16 -c";;
       threads-intro/x86.py) args="-p simple-race.s -t 1 -c";;
       threads-locks/x86.py) args="-p flag.s -c";;
+      cpu-api/generator.py) args="-s 1 -S 1 -c";;
       *) args="-c";;
     esac
-    out=$(cd "$dir" && timeout 30 "./$py" $args </dev/null 2>&1); rc=$?
+    t0=$(now_ms); out=$(cd "$dir" && timeout 30 "./$py" $args </dev/null 2>&1); rc=$?; dt=$(( $(now_ms) - t0 ))
     echo "== $f (rc=$rc)" >> "$LOG"; echo "$out" | tail -20 >> "$LOG"
-    if [ $rc -ne 0 ] || echo "$out" | grep -qE 'Traceback|No such file'; then ng "$f" "$(echo "$out" | tail -1)"; else ok "$f"; fi
+    if [ $rc -ne 0 ] || echo "$out" | grep -qE 'Traceback|No such file'; then ng "$f" "$dt" "$(echo "$out" | tail -1)"; else ok "$f" "$dt"; fi
   done
+  cd "$ROOT"
 fi
 
 echo "[4] C 과제 빌드 (make)"
@@ -62,6 +72,36 @@ echo "[5] 실행 확인"
 run "vmstat 실행"             vmstat 1 2
 [ -x "$T/code/intro/cpu" ] && run "code/intro/cpu 실행" sh -c "timeout 3 '$T/code/intro/cpu' A >/dev/null 2>&1; [ \$? -eq 124 ]"
 
+# ---------- 결과 파일 (제출용) ----------
+FINISHED=$(date -u +%Y-%m-%dT%H:%M:%SZ); DURATION=$(( $(now_ms) - T_START ))
+SELF="${BASH_SOURCE[0]}"
+RECEIPT="$ROOT/hw/setup/check-result.txt"; mkdir -p "$(dirname "$RECEIPT")"
+BODY=$(
+  echo "# OSTEP OS Lab check result"
+  echo "format: 2"
+  echo "github_user: ${GITHUB_USER:-}"
+  echo "codespaces: ${CODESPACES:-}"
+  echo "codespace_name: ${CODESPACE_NAME:-}"
+  echo "github_repository: ${GITHUB_REPOSITORY:-}"
+  echo "origin: $(git -C "$ROOT" remote get-url origin 2>/dev/null)"
+  echo "repo_head: $(git -C "$ROOT" rev-parse HEAD 2>/dev/null)"
+  echo "homework_commit: $(git -C "$HW" rev-parse --short=7 HEAD 2>/dev/null)"
+  echo "check_sh_sha256: $(sha256sum "$SELF" | cut -d' ' -f1)"
+  echo "kernel: $(uname -r)"
+  echo "os: $(. /etc/os-release; echo "$PRETTY_NAME")"
+  echo "cpus: $(nproc)"
+  echo "boot_id: $(cat /proc/sys/kernel/random/boot_id 2>/dev/null)"
+  echo "run_id: $NONCE"
+  echo "started_utc: $STARTED"
+  echo "finished_utc: $FINISHED"
+  echo "duration_ms: $DURATION"
+  echo "result: PASS $PASS / FAIL $FAIL"
+  echo "items:"
+  for it in "${ITEMS[@]}"; do echo "  $it"; done
+)
+{ echo "$BODY"; echo "result_sha256: $(printf '%s\n' "$BODY" | sha256sum | cut -d' ' -f1)"; } > "$RECEIPT"
+
 echo
+echo "결과 파일: hw/setup/check-result.txt  (commit, push해서 제출)"
 echo "결과: PASS $PASS / FAIL $FAIL   (상세 로그: $LOG)"
 [ $FAIL -eq 0 ] && echo "OSTEP homework를 수행할 준비가 되었습니다." || echo "FAIL 항목과 로그를 확인하세요."
