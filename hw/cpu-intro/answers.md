@@ -10,9 +10,13 @@ Simulation matches prediction exactly. Processes run sequentially without preemp
 
 ## Q2
 - Prediction / 预测:
+Process 1 will run all 5 CPU instructions first, then Process 2 runs all 5 CPU instructions. Total time will be 10 ticks, CPU utilization is 100%.
 - Reasoning / 理由:
+Policy SWITCH_ON_END only switches when a process finishes. No I/O in either workload, so processes run one after another sequentially. CPU never idle.
 - Verified result / 验证结果:
+Total time = 10 ticks, CPU utilization = 100%.
 - Analysis / 分析:
+Simulation matches prediction. SWITCH_ON_END does not preempt running processes. Processes run sequentially, no idle CPU cycles
 
 ## Q3
 - Prediction / 预测:
