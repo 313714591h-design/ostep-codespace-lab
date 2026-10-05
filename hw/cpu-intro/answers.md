@@ -4,7 +4,9 @@ PID0 runs 5 CPU instructions, then PID1 runs 5 CPU instructions. Total time = 10
 - Reasoning / 理由:
 The default policy SWITCH_ON_END switches CPU only when a process completes. Both processes are CPU-only, no I/O, so CPU is always busy.
 - Verified result / 验证结果:
+Total time = 10 ticks, CPU utilization = 100%.
 - Analysis / 分析:
+Simulation matches prediction exactly. Processes run sequentially without preemption, no idle CPU cycles.
 
 ## Q2
 - Prediction / 预测:
