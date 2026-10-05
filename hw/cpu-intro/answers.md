@@ -20,9 +20,13 @@ Simulation matches prediction. SWITCH_ON_END does not preempt running processes.
 
 ## Q3
 - Prediction / 预测:
+Process 0 runs 1 IO instruction first, then Process 1 runs all 4 CPU instructions. After IO completes, Process 0 resumes. Total time will be longer than 5 ticks, CPU will idle during IO.
 - Reasoning / 理由:
+Policy SWITCH_ON_END will switch when IO is issued. When Process 0 issues IO, CPU switches to Process1. While waiting for IO, CPU can run other jobs, but during IO wait period there will be idle cycles if no other process ready.
 - Verified result / 验证结果:
+Total time = 11 ticks, CPU utilization = 45%.
 - Analysis / 分析:
+Simulation matches prediction. When Process0 issues IO, system switches to Process1. CPU idles while waiting for IO to finish, leading to lower CPU utilization.
 
 ## Q4
 - Prediction / 预测:
