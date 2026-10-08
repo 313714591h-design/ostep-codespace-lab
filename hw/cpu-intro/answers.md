@@ -1,63 +1,253 @@
 ## Q1
 - Prediction / 预测:
-PID0 runs 5 CPU instructions, then PID1 runs 5 CPU instructions. Total time = 10 ticks, CPU utilization = 100%.
-- Reasoning / 理由:
-The default policy SWITCH_ON_END switches CPU only when a process completes. Both processes are CPU-only, no I/O, so CPU is always busy.
+```
+time   PID 0   PID 1   CPU   IOs
+1      RUN     REDAY   1     0
+2      RUN     REDAY   1     0
+3      RUN     READY   1     0
+4      RUN     READY   1     0
+5      RUN     REDAY   1     0
+6      DONE    RUN     1     0
+7      DONE    RUN     1     0
+8      DONE    RUN     1     0
+9      DONE    RUN     1     0
+10     DONE    RUN     1     0
+Toalt time=10
+CPU Buys=10(100%)
+IO Buys=0(0%)
+```
+- Reasoning / 理由: 总时间 10 ,cpu10占用率100%，io=0
 - Verified result / 验证结果:
 - Analysis / 分析:
 ## Q2
 - Prediction / 预测:
-Process 1 will run all 5 CPU instructions first, then Process 2 runs all 5 CPU instructions. Total time will be 10 ticks, CPU utilization is 100%.
-- Reasoning / 理由:
-Policy SWITCH_ON_END only switches when a process finishes. No I/O in either workload, so processes run one after another sequentially. CPU never idle.
+```
+time   PID 0   PID 1         CPU   IOs
+1      RUN     REDAY         1     0
+2      RUN     REDAY         1     0
+3      RUN     REDAY         1     0
+4      RUN     READY         1     0
+5      DONE    RUN:io        1     0
+6      DONE    BLOCKED       0     1
+7      DONE    BLOCKED       0     1
+8      DONE    BLOCKED       0     1
+9      DONE    BLOCKED       0     1
+10     DONE    BLOCKED       0     1
+11*    DONE    RUN:io_done   1     0
+Total time = 11
+CPU Buys = 6 (54.55%)
+IO Buys = 5（45.45%）
+```
+- Reasoning / 理由: 总时间 11 ,cpu6占用率54.55%,IO5占用率45.45%  
 - Verified result / 验证结果:
 - Analysis / 分析:
 
 ## Q3
 - Prediction / 预测:
-Process 0 runs 1 IO instruction first, then Process 1 runs all 4 CPU instructions. After IO completes, Process 0 resumes. Total time will be longer than 5 ticks, CPU will idle during IO.
-- Reasoning / 理由:
-Policy SWITCH_ON_END will switch when IO is issued. When Process 0 issues IO, CPU switches to Process1. While waiting for IO, CPU can run other jobs, but during IO wait period there will be idle cycles if no other process ready.
+```
+time   PID 0       PID 1         CPU   IOs
+1      RUN:io      REDAY         1     0
+2      BLOCKED     RUN           1     1
+3      BLOCKED     RUN           1     1
+4      BLOCKED     RUN           1     1
+5      BLOCKED     RUN           1     1
+6      BLOCKED     DONE          0     1
+7*     RUN:io_done DONE          1     0
+Total time = 7
+CPU Busy = 6 (6/7)
+IO Busy= 5 (5/7)
+```
+- Reasoning / 理由:总时间 ：7 ,cpu6占用率(85.71%),IO5占用率(71.43%)
 - Verified result / 验证结果:
 - Analysis / 分析:
 
 ## Q4
-- Prediction / 预测:
-When Process 0 starts I/O, SWITCH_ON_END policy will NOT switch context. CPU stays idle during I/O blocking period. After I/O finishes, Process 0 completes, then Process 1 can run. Total time will be long and CPU utilization low.
-- Reasoning / 理由:
-SWITCH_ON_END only switches when a process finishes completely. It will not switch out when process issues I/O. So CPU sits idle while waiting for I/O device.
+- Prediction / 预测 :
+```
+time   PID 0       PID 1         CPU   IOs
+1      RUN:io      REDAY         1     0
+2      BLOCKED     RUN           0     1
+3      BLOCKED     RUN           0     1
+4      BLOCKED     RUN           0     1
+5      BLOCKED     RUN           0     1
+6      BLOCKED     DONE          0     1
+7*     RUN:io_done DONE          1     0
+8      DONE        CPU           1     0
+9      DONE        CPU           1     0
+10     DONE        CPU           1     0
+11     DONE        CPU           1     0
+Total time=11
+CPU Busy = 6(54.55%)
+IO Busy= 5 (45.45%)
+```
+- Reasoning / 理由:总时间 ：11 ,cpu6占用率(54.55%),IO占用率(45.45%) 
 - Verified result / 验证结果:
 - Analysis / 分析:
 
 ## Q5
 - Prediction / 预测:
-When Process 0 starts I/O under SWITCH_ON_IO, the system switches to Process 1 immediately. Process 1 runs on the CPU while waiting for I/O. Total time will be shorter and CPU utilization higher than Q4
-- Reasoning / 理由:
-SWITCH_ON_IO triggers context switch when I/O starts. The OS uses the CPU to run another ready process during I/O waiting, overlapping computation and I/O to improve CPU usage.
+```
+time   PID 0        PID 1                     CPU             IOs
+1      RUN:io       READY                      0               0
+2      BLOCKED      RUN                        1               1
+3      BLOCKED      RUN                        1               1
+4      BLOCKED      RUN                        1               1
+5      BLOCKED      RUN                        1               1
+6      READY        RUN                        1               0
+7*     READY        DONE                       0               0
+Total time=7
+CPU Busy =5(71.43%)
+IO  Busy =4(57.14%)
+```
+- Reasoning / 理由:总时间：7，CPU占用率5(71.43%)，IO占用率4(57.14%)
 - Verified result / 验证结果:
 - Analysis / 分析:
 
 ## Q6
 - Prediction / 预测:
-When Process 0 finishes each I/O with IO_RUN_LATER, it will go to the ready queue instead of running immediately. CPU-bound processes will run first. Total runtime will be longer and I/O device utilization decreases.
-- Reasoning / 理由:
-IO_RUN_LATER means once I/O completes, the I/O process is placed in ready state. The scheduler picks other ready CPU-bound jobs first, so the I/O process cannot resume right away.
+```
+time   PID 0        PID 1          PID2               PID3            CPU             IOs
+1      RUN:io       READY          READY              READY            1               0
+2      BLOCKED      RUN            READY              READY            1               1
+3      BLOCKED      RUN            READY              READY            1               1
+4      BLOCKED      RUN            READY              READY            1               1
+5      BLOCKED      RUN            READY              READY            1               1
+6      BLOCKED      RUN            READY              READY            1               0
+7*     READY        DONE           RUN                READY            1               0
+8      READY        DONE           RUN                READY            1               0
+9      READY        DONE           RUN                READY            1               0
+10     READY        DONE           RUN                READY            1               0
+11     READY        DONE           RUN                READY            1               0
+12     READY        DONE           DONE               RUN              1               0
+13     READY        DONE           DONE               RUN              1               0
+14     READY        DONE           DONE               RUN              1               0
+15     READY        DONE           DONE               RUN              1               0 
+16     READY        DONE           DONE               RUN              1               0
+17     RUN:io_done  DONE           DONE               DONE             1               0
+18     RUN:io       DONE           DONE               DONE             1               0
+19     BLOCKED      DONE           DONE               DONE             1               1
+20     BLOCKED      DONE           DONE               DONE             1               1
+21     BLOCKED      DONE           DONE               DONE             1               1
+22     BLOCKED      DONE           DONE               DONE             1               1
+23     BLOCKED      DONE           DONE               DONE             1               1
+24*    RUN:io_done  DONE           DONE               DONE             1               0
+25     RUN:io       DONE           DONE               DONE             1               0
+26     BLOCKED      DONE           DONE               DONE             1               1
+27     BLOCKED      DONE           DONE               DONE             1               1
+28     BLOCKED      DONE           DONE               DONE             1               1
+29     BLOCKED      DONE           DONE               DONE             1               1
+30     BLOCKED      DONE           DONE               DONE             1               1
+31*    RUN:io_done  DONE           DONE               DONE             1               0
+Total time=31
+CPU Busy =21(67.74%)
+IO  Busy =15(48.39%)
+```
+- Reasoning / 理由:总时间：31，CPU占用率21(67.74%)，IO占用率15(48.39%)
 - Verified result / 验证结果:
 - Analysis / 分析:
 
 ## Q7
 - Prediction / 预测:
-When Process 0’s I/O finishes under IO_RUN_IMMEDIATE, it will run on CPU immediately. The I/O device can start next I/O operation quickly. Total runtime becomes shorter and I/O device utilization improves.
-- Reasoning / 理由:
-IO_RUN_IMMEDIATE schedules the completed I/O process to run right after I/O finishes. It does not wait in ready queue, so the I/O process can continue and reuse I/O device faster.
+```
+time   PID 0        PID 1          PID2               PID3            CPU             IOs
+1      RUN:io       READY          READY              READY            1               
+2      BLOCKED      RUN:CPU        READY              READY            1               1
+3      BLOCKED      RUN:CPU        READY              READY            1               1
+4      BLOCKED      RUN:CPU        READY              READY            1               1
+5      BLOCKED      RUN:CPU        READY              READY            1               1
+6      BLOCKED      RUN:CPU        READY              READY            1               
+7*     RUN:io_DONE  DONE           READY              READY            1               
+8      RUN:io       DONE           READY              READY            1               
+9      BLOCKED      DONE           RUN:CPU            READY            1               1
+10     BLOCKED      DONE           RUN:CPU            READY            1               1
+11     BLOCKED      DONE           RUN:CPU            READY            1               1
+12     BLOCKED      DONE           RUN:CPU            READY            1               1
+13     BLOCKED      DONE           RUN:CPU            READY            1               1
+14*    RUN:io_DONE  DONE           DONE               READY            1               
+15     RUN:io       DONE           DONE               READY            1                
+16     BLOCKED      DONE           DONE               RUN:CPU          1               1
+17     BLOCKED      DONE           DONE               RUN:CPU          1               1
+18     BLOCKED      DONE           DONE               RUN:CPU          1               1
+19     BLOCKED      DONE           DONE               RUN:CPU          1               1
+20     BLOCKED      DONE           DONE               RUN:CPU          1               1
+21*     RUN：io_DONE DONE           DONE               DONE            1               1
+Total time：21
+CPU Busy =21(100%）
+IO  Busy =15(71.43%)
+```
+- Reasoning / 理由:总时间：21，CPU占用率21（100%），Io占用率15（71.43%）
 - Verified result / 验证结果:
 - Analysis / 分析:
 
 ## Q8
+# Seed 1
 - Prediction / 预测:
-Different random seeds produce different interleaving of two CPU-bound processes. Default scheduling will switch at fixed ticks. IO_RUN_IMMEDIATE and SWITCH_ON_END will change the sequence and total runtime.
-- Reasoning / 理由:
-The seed controls random scheduling choices. Different policies change when context switch occurs. SWITCH_ON_END only switches when a job finishes, which may change the completion order.
+```
+time   PID 0        PID 1            CPU             IOs
+1      RUN:CPU      READY             1               
+2      RUN:io       READY             1               1
+3      BLOCKED      RUN:CPU           1               1
+4      BLOCKED      RUN:CPU           1               1
+5      BLOCKED      RUN:CPU           1               1
+6      BLOCKED      RUN:CPU           1               1
+7*     RUN:io_DONE  DONE              1               
+8      RUN:io       DONE              1               1
+9      BLOCKED      DONE                              1
+10     BLOCKED      DONE                              1
+11     BLOCKED      DONE                              1
+12     BLOCKED      DONE                              1
+13*    RUN:io_DONE  DONE              1                
+Total time：13
+CPU Busy =9(69.23%）
+IO  Busy =10(76.92%)
+```
+- Reasoning / 理由:总时间：13，CPU占用率9(69.23%)，IO占用率10(76.92%)
+- Verified result / 验证结果:
+- Analysis / 分析:
+# Seed 2
+- Prediction / 预测:
+```
+time   PID 0        PID 1            CPU             IOs
+1      RUN:io       READY             1               
+2      BLOCKED      RUN:CPU           1               1
+3*     RUN:io_done  RUN:CPU           1               
+4      RUN:io       RUN:CPU           1               
+5      BLOCKED      RUN:CPU           1               1
+6*     RUN:io_done  RUN:CPU           1               1
+7      RUN:CPU      BLOCKED           1               1
+8      DONE         BLOCKED                           1
+9*     DONE         RUN:io_done       1               
+10     DONE         RUN:io            1               
+11     DONE         BLOCKED                           1
+12*    DONE         RUN:io_done       1                
+Total time：12
+CPU Busy =11(91.67%） 
+IO  Busy =6(50%)
+```
+- Reasoning / 理由:总时间：12，CPU占用率11(91.67%)，IO占用率6(50%)
+- Verified result / 验证结果:
+- Analysis / 分析:
+# Seed 3
+- Prediction / 预测:
+```
+time   PID 0        PID 1            CPU             IOs
+1      RUN:CPU      READY             1               
+2      RUN:io       READY             1               
+3      BLOCKED      RUN:io            1               1
+4*     RUN:io_done  BLOCKED           1               1 
+5      RUN:CPU      RUN:io_done       1
+6      DONE         RUN:io            1               
+7      DONE         BLOCKED                           1
+8*     DONE         RUN:io_done       1          
+9      DONE         RUN:io            1               
+10     DONE         BLOCKED                           1               
+11*    DONE         RUN:io_done       1
+12     DONE         RUN:cpu           1                
+Total time：12
+CPU Busy =10(83.33%） 
+IO  Busy =8(66.67%)
+```
+- Reasoning / 理由:总时间：12，CPU占用率10(83.33%)，IO占用率8(66.67%)
 - Verified result / 验证结果:
 - Analysis / 分析:
 
