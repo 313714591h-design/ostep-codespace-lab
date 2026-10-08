@@ -18,7 +18,24 @@ IO Buys=0(0%)
 ```
 - Reasoning / 理由: 总时间 10 ,cpu10占用率100%，io=0
 - Verified result / 验证结果:
-- Analysis / 分析:
+```
+Time        PID: 0        PID: 1           CPU           IOs
+  1        RUN:cpu         READY             1          
+  2        RUN:cpu         READY             1          
+  3        RUN:cpu         READY             1          
+  4        RUN:cpu         READY             1          
+  5        RUN:cpu         READY             1          
+  6           DONE       RUN:cpu             1          
+  7           DONE       RUN:cpu             1          
+  8           DONE       RUN:cpu             1          
+  9           DONE       RUN:cpu             1          
+ 10           DONE       RUN:cpu             1          
+
+Stats: Total Time 10
+Stats: CPU Busy 10 (100.00%)
+Stats: IO Busy  0 (0.00%)
+```
+- Analysis / 分析:最开始理解比较困难，解读后慢慢开始理解，然后通读文件开始解答
 ## Q2
 - Prediction / 预测:
 ```
@@ -40,7 +57,25 @@ IO Buys = 5（45.45%）
 ```
 - Reasoning / 理由: 总时间 11 ,cpu6占用率54.55%,IO5占用率45.45%  
 - Verified result / 验证结果:
-- Analysis / 分析:
+```
+Time        PID: 0        PID: 1           CPU           IOs
+  1        RUN:cpu         READY             1          
+  2        RUN:cpu         READY             1          
+  3        RUN:cpu         READY             1          
+  4        RUN:cpu         READY             1          
+  5           DONE        RUN:io             1          
+  6           DONE       BLOCKED                           1
+  7           DONE       BLOCKED                           1
+  8           DONE       BLOCKED                           1
+  9           DONE       BLOCKED                           1
+ 10           DONE       BLOCKED                           1
+ 11*          DONE   RUN:io_done             1          
+
+Stats: Total Time 11
+Stats: CPU Busy 6 (54.55%)
+Stats: IO Busy  5 (45.45%)
+```
+- Analysis / 分析:第一次做的时候没有按照题目要求，后面通读了ppt开始按照文件要求
 
 ## Q3
 - Prediction / 预测:
@@ -59,7 +94,21 @@ IO Busy= 5 (5/7)
 ```
 - Reasoning / 理由:总时间 ：7 ,cpu6占用率(85.71%),IO5占用率(71.43%)
 - Verified result / 验证结果:
-- Analysis / 分析:
+```
+Time        PID: 0        PID: 1           CPU           IOs
+  1         RUN:io         READY             1          
+  2        BLOCKED       RUN:cpu             1             1
+  3        BLOCKED       RUN:cpu             1             1
+  4        BLOCKED       RUN:cpu             1             1
+  5        BLOCKED       RUN:cpu             1             1
+  6        BLOCKED          DONE                           1
+  7*   RUN:io_done          DONE             1          
+
+Stats: Total Time 7
+Stats: CPU Busy 6 (85.71%)
+Stats: IO Busy  5 (71.43%)
+```
+- Analysis / 分析:第三个题做的比较顺利，理由这一栏我尽力了
 
 ## Q4
 - Prediction / 预测 :
@@ -82,7 +131,25 @@ IO Busy= 5 (45.45%)
 ```
 - Reasoning / 理由:总时间 ：11 ,cpu6占用率(54.55%),IO占用率(45.45%) 
 - Verified result / 验证结果:
-- Analysis / 分析:
+```
+Time        PID: 0        PID: 1           CPU           IOs
+  1         RUN:io         READY             1          
+  2        BLOCKED         READY                           1
+  3        BLOCKED         READY                           1
+  4        BLOCKED         READY                           1
+  5        BLOCKED         READY                           1
+  6        BLOCKED         READY                           1
+  7*   RUN:io_done         READY             1          
+  8           DONE       RUN:cpu             1          
+  9           DONE       RUN:cpu             1          
+ 10           DONE       RUN:cpu             1          
+ 11           DONE       RUN:cpu             1          
+
+Stats: Total Time 11
+Stats: CPU Busy 6 (54.55%)
+Stats: IO Busy  5 (45.45%)
+```
+- Analysis / 分析:第四题开始复杂，有些绕
 
 ## Q5
 - Prediction / 预测:
@@ -100,7 +167,21 @@ CPU Busy =5(71.43%)
 IO  Busy =4(57.14%)
 ```
 - Reasoning / 理由:总时间：7，CPU占用率5(71.43%)，IO占用率4(57.14%)
-- Verified result / 验证结果:
+- Verified result / 验证结果:第五题不是太难，逐渐上手
+```
+Time        PID: 0        PID: 1           CPU           IOs
+  1         RUN:io         READY             1          
+  2        BLOCKED       RUN:cpu             1             1
+  3        BLOCKED       RUN:cpu             1             1
+  4        BLOCKED       RUN:cpu             1             1
+  5        BLOCKED       RUN:cpu             1             1
+  6        BLOCKED          DONE                           1
+  7*   RUN:io_done          DONE             1          
+
+Stats: Total Time 7
+Stats: CPU Busy 6 (85.71%)
+Stats: IO Busy  5 (71.43%)
+```
 - Analysis / 分析:
 
 ## Q6
@@ -144,7 +225,41 @@ IO  Busy =15(48.39%)
 ```
 - Reasoning / 理由:总时间：31，CPU占用率21(67.74%)，IO占用率15(48.39%)
 - Verified result / 验证结果:
-- Analysis / 分析:
+```
+Time        PID: 0        PID: 1        PID: 2        PID: 3           CPU           IOs
+  1         RUN:io         READY         READY         READY             1          
+  2        BLOCKED       RUN:cpu         READY         READY             1             1
+  3        BLOCKED       RUN:cpu         READY         READY             1             1
+  4        BLOCKED       RUN:cpu         READY         READY             1             1
+  5        BLOCKED       RUN:cpu         READY         READY             1             1
+  6        BLOCKED       RUN:cpu         READY         READY             1             1
+  7*         READY          DONE       RUN:cpu         READY             1          
+  8          READY          DONE       RUN:cpu         READY             1          
+  9          READY          DONE       RUN:cpu         READY             1          
+ 10          READY          DONE       RUN:cpu         READY             1          
+ 11          READY          DONE       RUN:cpu         READY             1          
+ 12          READY          DONE          DONE       RUN:cpu             1          
+ 13          READY          DONE          DONE       RUN:cpu             1          
+ 14          READY          DONE          DONE       RUN:cpu             1          
+ 15          READY          DONE          DONE       RUN:cpu             1          
+ 16          READY          DONE          DONE       RUN:cpu             1          
+ 17    RUN:io_done          DONE          DONE          DONE             1          
+ 18         RUN:io          DONE          DONE          DONE             1          
+ 19        BLOCKED          DONE          DONE          DONE                           1
+ 20        BLOCKED          DONE          DONE          DONE                           1
+ 21        BLOCKED          DONE          DONE          DONE                           1
+ 22        BLOCKED          DONE          DONE          DONE                           1
+ 23        BLOCKED          DONE          DONE          DONE                           1
+ 24*   RUN:io_done          DONE          DONE          DONE             1          
+ 25         RUN:io          DONE          DONE          DONE             1          
+ 26        BLOCKED          DONE          DONE          DONE                           1
+ 27        BLOCKED          DONE          DONE          DONE                           1
+ 28        BLOCKED          DONE          DONE          DONE                           1
+ 29        BLOCKED          DONE          DONE          DONE                           1
+ 30        BLOCKED          DONE          DONE          DONE                           1
+ 31*   RUN:io_done          DONE          DONE          DONE             1          
+```
+- Analysis / 分析:第六题做的时间比较久，验证过才敢写
 
 ## Q7
 - Prediction / 预测:
@@ -177,7 +292,35 @@ IO  Busy =15(71.43%)
 ```
 - Reasoning / 理由:总时间：21，CPU占用率21（100%），Io占用率15（71.43%）
 - Verified result / 验证结果:
-- Analysis / 分析:
+```
+Time        PID: 0        PID: 1        PID: 2        PID: 3           CPU           IOs
+  1         RUN:io         READY         READY         READY             1          
+  2        BLOCKED       RUN:cpu         READY         READY             1             1
+  3        BLOCKED       RUN:cpu         READY         READY             1             1
+  4        BLOCKED       RUN:cpu         READY         READY             1             1
+  5        BLOCKED       RUN:cpu         READY         READY             1             1
+  6        BLOCKED       RUN:cpu         READY         READY             1             1
+  7*   RUN:io_done          DONE         READY         READY             1          
+  8         RUN:io          DONE         READY         READY             1          
+  9        BLOCKED          DONE       RUN:cpu         READY             1             1
+ 10        BLOCKED          DONE       RUN:cpu         READY             1             1
+ 11        BLOCKED          DONE       RUN:cpu         READY             1             1
+ 12        BLOCKED          DONE       RUN:cpu         READY             1             1
+ 13        BLOCKED          DONE       RUN:cpu         READY             1             1
+ 14*   RUN:io_done          DONE          DONE         READY             1          
+ 15         RUN:io          DONE          DONE         READY             1          
+ 16        BLOCKED          DONE          DONE       RUN:cpu             1             1
+ 17        BLOCKED          DONE          DONE       RUN:cpu             1             1
+ 18        BLOCKED          DONE          DONE       RUN:cpu             1             1
+ 19        BLOCKED          DONE          DONE       RUN:cpu             1             1
+ 20        BLOCKED          DONE          DONE       RUN:cpu             1             1
+ 21*   RUN:io_done          DONE          DONE          DONE             1          
+
+Stats: Total Time 21
+Stats: CPU Busy 21 (100.00%)
+Stats: IO Busy  15 (71.43%)
+```
+- Analysis / 分析:第七题写的时候绕晕了，舍友帮我再分析了一遍题目
 
 ## Q8
 # Seed 1
@@ -203,7 +346,77 @@ IO  Busy =10(76.92%)
 ```
 - Reasoning / 理由:总时间：13，CPU占用率9(69.23%)，IO占用率10(76.92%)
 - Verified result / 验证结果:
-- Analysis / 分析:
+```
+### default
+Time        PID: 0        PID: 1           CPU           IOs
+  1        RUN:cpu         READY             1          
+  2         RUN:io         READY             1          
+  3        BLOCKED       RUN:cpu             1             1
+  4        BLOCKED       RUN:cpu             1             1
+  5        BLOCKED       RUN:cpu             1             1
+  6        BLOCKED          DONE                           1
+  7        BLOCKED          DONE                           1
+  8*   RUN:io_done          DONE             1          
+  9         RUN:io          DONE             1          
+ 10        BLOCKED          DONE                           1
+ 11        BLOCKED          DONE                           1
+ 12        BLOCKED          DONE                           1
+ 13        BLOCKED          DONE                           1
+ 14        BLOCKED          DONE                           1
+ 15*   RUN:io_done          DONE             1          
+
+Stats: Total Time 15
+Stats: CPU Busy 8 (53.33%)
+Stats: IO Busy  10 (66.67%)
+
+### -I IO_RUN_IMMEDIATE
+Time        PID: 0        PID: 1           CPU           IOs
+  1        RUN:cpu         READY             1          
+  2         RUN:io         READY             1          
+  3        BLOCKED       RUN:cpu             1             1
+  4        BLOCKED       RUN:cpu             1             1
+  5        BLOCKED       RUN:cpu             1             1
+  6        BLOCKED          DONE                           1
+  7        BLOCKED          DONE                           1
+  8*   RUN:io_done          DONE             1          
+  9         RUN:io          DONE             1          
+ 10        BLOCKED          DONE                           1
+ 11        BLOCKED          DONE                           1
+ 12        BLOCKED          DONE                           1
+ 13        BLOCKED          DONE                           1
+ 14        BLOCKED          DONE                           1
+ 15*   RUN:io_done          DONE             1          
+
+Stats: Total Time 15
+Stats: CPU Busy 8 (53.33%)
+Stats: IO Busy  10 (66.67%)
+
+### -S SWITCH_ON_END
+Time        PID: 0        PID: 1           CPU           IOs
+  1        RUN:cpu         READY             1          
+  2         RUN:io         READY             1          
+  3        BLOCKED         READY                           1
+  4        BLOCKED         READY                           1
+  5        BLOCKED         READY                           1
+  6        BLOCKED         READY                           1
+  7        BLOCKED         READY                           1
+  8*   RUN:io_done         READY             1          
+  9         RUN:io         READY             1          
+ 10        BLOCKED         READY                           1
+ 11        BLOCKED         READY                           1
+ 12        BLOCKED         READY                           1
+ 13        BLOCKED         READY                           1
+ 14        BLOCKED         READY                           1
+ 15*   RUN:io_done         READY             1          
+ 16           DONE       RUN:cpu             1          
+ 17           DONE       RUN:cpu             1          
+ 18           DONE       RUN:cpu             1          
+
+Stats: Total Time 18
+Stats: CPU Busy 8 (44.44%)
+Stats: IO Busy  10 (55.56%)
+```
+- Analysis / 分析:第八题彻底绕进去了，借助了AI，但是都是自己打的，AI帮我理清了思路
 # Seed 2
 - Prediction / 预测:
 ```
@@ -226,7 +439,91 @@ IO  Busy =6(50%)
 ```
 - Reasoning / 理由:总时间：12，CPU占用率11(91.67%)，IO占用率6(50%)
 - Verified result / 验证结果:
-- Analysis / 分析:
+```
+### default
+Time        PID: 0        PID: 1           CPU           IOs
+  1         RUN:io         READY             1          
+  2        BLOCKED       RUN:cpu             1             1
+  3        BLOCKED        RUN:io             1             1
+  4        BLOCKED       BLOCKED                           2
+  5        BLOCKED       BLOCKED                           2
+  6        BLOCKED       BLOCKED                           2
+  7*   RUN:io_done       BLOCKED             1             1
+  8         RUN:io       BLOCKED             1             1
+  9*       BLOCKED   RUN:io_done             1             1
+ 10        BLOCKED        RUN:io             1             1
+ 11        BLOCKED       BLOCKED                           2
+ 12        BLOCKED       BLOCKED                           2
+ 13        BLOCKED       BLOCKED                           2
+ 14*   RUN:io_done       BLOCKED             1             1
+ 15        RUN:cpu       BLOCKED             1             1
+ 16*          DONE   RUN:io_done             1          
+
+Stats: Total Time 16
+Stats: CPU Busy 10 (62.50%)
+Stats: IO Busy  14 (87.50%)
+
+### -I IO_RUN_IMMEDIATE
+Time        PID: 0        PID: 1           CPU           IOs
+  1         RUN:io         READY             1          
+  2        BLOCKED       RUN:cpu             1             1
+  3        BLOCKED        RUN:io             1             1
+  4        BLOCKED       BLOCKED                           2
+  5        BLOCKED       BLOCKED                           2
+  6        BLOCKED       BLOCKED                           2
+  7*   RUN:io_done       BLOCKED             1             1
+  8         RUN:io       BLOCKED             1             1
+  9*       BLOCKED   RUN:io_done             1             1
+ 10        BLOCKED        RUN:io             1             1
+ 11        BLOCKED       BLOCKED                           2
+ 12        BLOCKED       BLOCKED                           2
+ 13        BLOCKED       BLOCKED                           2
+ 14*   RUN:io_done       BLOCKED             1             1
+ 15        RUN:cpu       BLOCKED             1             1
+ 16*          DONE   RUN:io_done             1          
+
+Stats: Total Time 16
+Stats: CPU Busy 10 (62.50%)
+Stats: IO Busy  14 (87.50%)
+
+### -S SWITCH_ON_END
+Time        PID: 0        PID: 1           CPU           IOs
+  1         RUN:io         READY             1          
+  2        BLOCKED         READY                           1
+  3        BLOCKED         READY                           1
+  4        BLOCKED         READY                           1
+  5        BLOCKED         READY                           1
+  6        BLOCKED         READY                           1
+  7*   RUN:io_done         READY             1          
+  8         RUN:io         READY             1          
+  9        BLOCKED         READY                           1
+ 10        BLOCKED         READY                           1
+ 11        BLOCKED         READY                           1
+ 12        BLOCKED         READY                           1
+ 13        BLOCKED         READY                           1
+ 14*   RUN:io_done         READY             1          
+ 15        RUN:cpu         READY             1          
+ 16           DONE       RUN:cpu             1          
+ 17           DONE        RUN:io             1          
+ 18           DONE       BLOCKED                           1
+ 19           DONE       BLOCKED                           1
+ 20           DONE       BLOCKED                           1
+ 21           DONE       BLOCKED                           1
+ 22           DONE       BLOCKED                           1
+ 23*          DONE   RUN:io_done             1          
+ 24           DONE        RUN:io             1          
+ 25           DONE       BLOCKED                           1
+ 26           DONE       BLOCKED                           1
+ 27           DONE       BLOCKED                           1
+ 28           DONE       BLOCKED                           1
+ 29           DONE       BLOCKED                           1
+ 30*          DONE   RUN:io_done             1          
+
+Stats: Total Time 30
+Stats: CPU Busy 10 (33.33%)
+Stats: IO Busy  20 (66.67%)
+```
+- Analysis / 分析:借助了AI理清思路
 # Seed 3
 - Prediction / 预测:
 ```
@@ -249,5 +546,87 @@ IO  Busy =8(66.67%)
 ```
 - Reasoning / 理由:总时间：12，CPU占用率10(83.33%)，IO占用率8(66.67%)
 - Verified result / 验证结果:
-- Analysis / 分析:
+```
+### default
+Time        PID: 0        PID: 1           CPU           IOs
+  1        RUN:cpu         READY             1          
+  2         RUN:io         READY             1          
+  3        BLOCKED        RUN:io             1             1
+  4        BLOCKED       BLOCKED                           2
+  5        BLOCKED       BLOCKED                           2
+  6        BLOCKED       BLOCKED                           2
+  7        BLOCKED       BLOCKED                           2
+  8*   RUN:io_done       BLOCKED             1             1
+  9*       RUN:cpu         READY             1          
+ 10           DONE   RUN:io_done             1          
+ 11           DONE        RUN:io             1          
+ 12           DONE       BLOCKED                           1
+ 13           DONE       BLOCKED                           1
+ 14           DONE       BLOCKED                           1
+ 15           DONE       BLOCKED                           1
+ 16           DONE       BLOCKED                           1
+ 17*          DONE   RUN:io_done             1          
+ 18           DONE       RUN:cpu             1          
+
+Stats: Total Time 18
+Stats: CPU Busy 9 (50.00%)
+Stats: IO Busy  11 (61.11%)
+
+### -I IO_RUN_IMMEDIATE
+Time        PID: 0        PID: 1           CPU           IOs
+  1        RUN:cpu         READY             1          
+  2         RUN:io         READY             1          
+  3        BLOCKED        RUN:io             1             1
+  4        BLOCKED       BLOCKED                           2
+  5        BLOCKED       BLOCKED                           2
+  6        BLOCKED       BLOCKED                           2
+  7        BLOCKED       BLOCKED                           2
+  8*   RUN:io_done       BLOCKED             1             1
+  9*         READY   RUN:io_done             1          
+ 10          READY        RUN:io             1          
+ 11        RUN:cpu       BLOCKED             1             1
+ 12           DONE       BLOCKED                           1
+ 13           DONE       BLOCKED                           1
+ 14           DONE       BLOCKED                           1
+ 15           DONE       BLOCKED                           1
+ 16*          DONE   RUN:io_done             1          
+ 17           DONE       RUN:cpu             1          
+
+Stats: Total Time 17
+Stats: CPU Busy 9 (52.94%)
+Stats: IO Busy  11 (64.71%)
+
+### -S SWITCH_ON_END
+Time        PID: 0        PID: 1           CPU           IOs
+  1        RUN:cpu         READY             1          
+  2         RUN:io         READY             1          
+  3        BLOCKED         READY                           1
+  4        BLOCKED         READY                           1
+  5        BLOCKED         READY                           1
+  6        BLOCKED         READY                           1
+  7        BLOCKED         READY                           1
+  8*   RUN:io_done         READY             1          
+  9        RUN:cpu         READY             1          
+ 10           DONE        RUN:io             1          
+ 11           DONE       BLOCKED                           1
+ 12           DONE       BLOCKED                           1
+ 13           DONE       BLOCKED                           1
+ 14           DONE       BLOCKED                           1
+ 15           DONE       BLOCKED                           1
+ 16*          DONE   RUN:io_done             1          
+ 17           DONE        RUN:io             1          
+ 18           DONE       BLOCKED                           1
+ 19           DONE       BLOCKED                           1
+ 20           DONE       BLOCKED                           1
+ 21           DONE       BLOCKED                           1
+ 22           DONE       BLOCKED                           1
+ 23*          DONE   RUN:io_done             1          
+ 24           DONE       RUN:cpu             1          
+
+Stats: Total Time 24
+Stats: CPU Busy 9 (37.50%)
+Stats: IO Busy  15 (62.50%)
+
+```
+- Analysis / 分析：借助了AI帮助理清思路
 
